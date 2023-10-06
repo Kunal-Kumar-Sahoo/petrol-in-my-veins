@@ -40,9 +40,11 @@ for file_name in os.listdir(folder_path):
     file_path = os.path.join(folder_path, file_name)
     if os.path.isfile(file_path):
         data = pd.read_csv(file_path)
-        data_list = list(data['P-TPT'])
-
-
+        data_list0 = list(data['P-PDG'])
+        data_list1 = list(data['P-TPT'])
+        data_list2 = list(data['T-TPT'])
+        data_list3 = list(data['P-MON-CKP'])
+    
 def send_email(subject, message):
     try:
         msg = MIMEText(message)
@@ -64,12 +66,15 @@ def getNext():
     with open('./cache.txt','r+') as f:
         counter=int(f.read())
         end_counter=int(int(counter)+700)
-        data_updated=data_list[int(counter):int(end_counter)]
+        data_updated=[data_list0[int(counter):int(end_counter)],data_list1[int(counter):int(end_counter)],data_list2[int(counter):int(end_counter)],data_list3[int(counter):int(end_counter)],]
         counter=int(int(counter)+700)
         f.seek(0)
         f.write(str(counter))
-        data_string = "  ".join(map(str, data_updated))
-        return jsonify(data_string)
+        final_data = []
+        for individual_data in data_updated:
+            data_string = "  ".join(map(str, individual_data))
+            final_data.append(jsonify(data_string))
+        return json.dumps(final_data)
 
 
 # @app.route('/test', methods=['GET'])
