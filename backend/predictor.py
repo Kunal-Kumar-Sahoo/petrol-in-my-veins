@@ -88,28 +88,6 @@ def predict_(model, inputs):
     preds = model.predict(inputs)
     return (np.argmax(preds, axis=1), preds)
 
-def img(a):
-    A=np.zeros((m+1))
-    for i in range(4): # cycle for extracting  4 samples from timewindow
-        startP=i*100
-        if i==0:
-            A=a[startP:startP+m]
-            maxV=max(A)
-            minV=min(A)
-            d=maxV-minV
-            for j in range(m):
-                A[j]=(A[j]-minV)/d # erasing absolute value feature by rescaling
-            A.append(d/maxV) # adding scale coefficient sv
-        else:
-            B=a[startP:startP+m]
-            maxV=max(B)
-            minV=min(B)
-            d=maxV-minV
-            for j in range(m):
-                B[j]=(B[j]-minV)/d# erasing absolute value feature by rescaling
-            B.append(d/maxV) # adding scale coefficient sv
-            A=np.vstack((A,B))
-    return(A)
 
 if __name__ == '__main__':
     # unit testing code here
