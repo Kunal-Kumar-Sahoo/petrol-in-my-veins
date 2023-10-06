@@ -1,7 +1,9 @@
 import os
+import csv
 import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
+import predictor
 from flask import Flask, render_template, request, jsonify, Response
 from flask_cors import CORS
 import numpy as np
@@ -158,12 +160,18 @@ def load_dataset():
 
     return [p1, p2, ts2, sc]
 
-def send_preds(dataset):
-    model = keras.models.load('backend\iteration1.iteration1.keras')
-    response_content = predict_(model, dataset)
+def dataset_creator():
+    p1, p2, ts2, sc = load_dataset()
+    p1, p2, ts2 = predictor.data_generator()
+    return p1, p2, ts2, sc
 
-    response_content[0] = [prediction_labels[i] for i in response_content[0]]
 
+def send_preds():
+    model = keras.models.load('backend/iteration1.keras')
+    p1, p2, ts2, sc = dataset_creator()
+    response_content = predict_(model, [p1, p2, ts2, sc])
+    for i in range(5):
+        response_content[i] = [prediction_labels[i] for i in response_content[i]]
     return response_content
 
 if __name__ == '__main__':

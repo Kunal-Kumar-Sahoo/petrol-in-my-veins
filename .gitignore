@@ -1,6 +1,5 @@
 3W/
-./backend/Dockerfile
-./data/
-node_modules/
+backend/Dockerfile
 data/
-__pycache__/
+node_modules/
+*.zip

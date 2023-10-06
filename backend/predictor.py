@@ -1,7 +1,6 @@
 import csv
 import numpy as np
-import os
-
+import random
 from  tensorflow import keras
 from tensorflow.keras import layers
 from  tensorflow import math
@@ -86,6 +85,29 @@ def get_model(x=700):
 def predict_(model, inputs):
     preds = model.predict(inputs)
     return [np.argmax(preds, axis=1), preds]
+
+def data_generator():
+    dataset=[]
+    with open(r'data/2.csv', newline='') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            dataset.append(row)
+    dataset = np.array(dataset, dtype=np.float32)
+
+    # print('Dataset:', dataset.shape)
+
+    vs = 0.5
+    x = 700
+    label,p1,ts1,p2,ts2,t2,ts3,interlabel=np.hsplit(dataset, [1,x+1,x+2,2*x+2,2*x+3,3*x+3,3*x+4])
+    label=label.flatten()
+    sc=np.concatenate([ts1,ts2,ts3], axis=1)
+
+    for i in range(p1.shape[0]):
+        f = random.uniform(0.9, 1.05)
+        p1[i] = p1[i]*f
+        p2[i] = p2[i]*f
+        t2[i] = t2[i]*f
+    return p1, p2, t2
 
 
 if __name__ == '__main__':
