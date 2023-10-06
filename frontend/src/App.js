@@ -5,8 +5,8 @@ import Plot from 'react-plotly.js';
 function App() {
   const [selectedPage, setSelectedPage] = useState('Dashboard');
   const [apiData, setApiData] = useState('');
+  const [plotData, setPlotData] = useState({});
   const [selectedData, setSelectedData] = useState('');
-  const [plotData, setPlotData] = useState([]);
   const [plotTitle, setPlotTitle] = useState('');
 
   useEffect(() => {
@@ -14,9 +14,8 @@ function App() {
 
     const fetchDataFromApi = async () => {
       try {
-        const response = await axios.get(apiEndpoint, { responseType: 'text' });
+        const response = await axios.get(apiEndpoint, { responseType: 'json' });
         if (response.status === 200) {
-          console.log(response.data)
           setApiData(response.data);
         } else {
           console.error('Error', response.status);
@@ -31,34 +30,41 @@ function App() {
 
   useEffect(() => {
     if (apiData) {
-      const dataArray = apiData.split('  ').map(Number);
-      setPlotData(dataArray);
+      // Assuming that apiData is an object containing four arrays, e.g., { data_list0: [], data_list1: [], data_list2: [], data_list3: [] }
+      setPlotData(apiData);
     }
   }, [apiData]);
 
   const renderDashboard = () => {
+    // Check if plotData is not empty
+    if (Object.keys(plotData).length === 0) {
+      return <div>Loading...</div>;
+    }
+
     return (
       <div>
         <h1>Real-time Dashboard</h1>
-        <div>
-          <Plot
-            data={[
-              {
-                x: Array.from({ length: plotData.length }, (_, i) => i),
-                y: plotData,
-                type: 'line',
-                name: plotTitle,
-              },
-            ]}
-            layout={{ title: plotTitle }}
-          />
-        </div>
-        <h2>Data Summary</h2>
-        <p>Selected Data: {selectedData}</p>
-        <p>
-          Mean of {selectedData}:{' '}
-          {plotData.reduce((a, b) => a + b, 0) / plotData.length}
-        </p>
+        {Object.keys(plotData).map((dataKey, index) => (
+          <div key={index}>
+            <Plot
+              data={[
+                {
+                  x: Array.from({ length: plotData[dataKey].length }, (_, i) => i),
+                  y: plotData[dataKey],
+                  type: 'line',
+                  name: dataKey,
+                },
+              ]}
+              layout={{ title: dataKey }}
+            />
+            <h2>Data Summary</h2>
+            <p>Selected Data: {selectedData}</p>
+            <p>
+              Mean of {selectedData}:{' '}
+              {plotData[dataKey].reduce((a, b) => a + b, 0) / plotData[dataKey].length}
+            </p>
+          </div>
+        ))}
       </div>
     );
   };

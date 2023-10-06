@@ -6,6 +6,7 @@ from flask import Flask, render_template, request, jsonify, Response
 from flask_cors import CORS
 import numpy as np
 import time
+import json
 
 from predictor import predict_
 
@@ -36,14 +37,14 @@ prediction_labels = [
 ]
 
 folder_path = "./3W/0"
-for file_name in os.listdir(folder_path):
-    file_path = os.path.join(folder_path, file_name)
+data_list0, data_list1, data_list2, data_list3 = [], [], [], []
+def load_data(file_path):
     if os.path.isfile(file_path):
         data = pd.read_csv(file_path)
-        data_list0 = list(data['P-PDG'])
-        data_list1 = list(data['P-TPT'])
-        data_list2 = list(data['T-TPT'])
-        data_list3 = list(data['P-MON-CKP'])
+        data_list0.extend(list(data['P-PDG']))
+        data_list1.extend(list(data['P-TPT']))
+        data_list2.extend(list(data['T-TPT']))
+        data_list3.extend(list(data['P-MON-CKP']))
     
 def send_email(subject, message):
     try:
@@ -60,21 +61,29 @@ def send_email(subject, message):
     except Exception as e:
         return str(e)
 
+for file_name in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, file_name)
+        load_data(file_path)
 
 @app.route('/analysis', methods=['GET'])
-def getNext():
-    with open('./cache.txt','r+') as f:
-        counter=int(f.read())
-        end_counter=int(int(counter)+700)
-        data_updated=[data_list0[int(counter):int(end_counter)],data_list1[int(counter):int(end_counter)],data_list2[int(counter):int(end_counter)],data_list3[int(counter):int(end_counter)],]
-        counter=int(int(counter)+700)
-        f.seek(0)
-        f.write(str(counter))
-        final_data = []
-        for individual_data in data_updated:
-            data_string = "  ".join(map(str, individual_data))
-            final_data.append(jsonify(data_string))
-        return json.dumps(final_data)
+def get_next():
+    try:
+        with open('./cache.txt', 'r+') as f:
+            counter = int(f.read())
+            end_counter = int(counter + 700)
+            data_updated = {
+                'data_list0': data_list0[counter:end_counter],
+                'data_list1': data_list1[counter:end_counter],
+                'data_list2': data_list2[counter:end_counter],
+                'data_list3': data_list3[counter:end_counter]
+            }
+            counter = int(counter + 700)
+            f.seek(0)
+            f.write(str(counter))
+            data_string = jsonify(data_updated)
+            return data_string
+    except Exception as e:
+        return str(e)
 
 
 # @app.route('/test', methods=['GET'])
