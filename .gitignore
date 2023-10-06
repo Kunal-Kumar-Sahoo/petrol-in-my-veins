@@ -1,4 +1,5 @@
 3W/
-./backend/Dockerfile
-./data/
+backend/Dockerfile
+data/
 node_modules/
+*.zip
