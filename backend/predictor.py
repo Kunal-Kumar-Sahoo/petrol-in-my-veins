@@ -86,7 +86,7 @@ def get_model(x=700):
 
 def predict_(model, inputs):
     preds = model.predict(inputs)
-    return np.argmax(preds, axis=1)
+    return (np.argmax(preds, axis=1), preds)
 
 def img(a):
     A=np.zeros((m+1))
