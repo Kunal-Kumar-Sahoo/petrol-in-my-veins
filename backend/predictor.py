@@ -86,7 +86,7 @@ def get_model(x=700):
 
 def predict_(model, inputs):
     preds = model.predict(inputs)
-    return preds
+    return np.argmax(preds, axis=1)
 
 def img(a):
     A=np.zeros((m+1))
@@ -113,10 +113,10 @@ def img(a):
 
 if __name__ == '__main__':
     # unit testing code here
-    model = keras.models.load_model('iteration1.keras')
+    model = keras.models.load_model('backend/iteration1.keras')
     # print(model.summary())
     dataset=[]
-    with open(r'../data/2.csv', newline='') as f:
+    with open(r'data/2.csv', newline='') as f:
         reader = csv.reader(f)
         for row in reader:
             dataset.append(row)
@@ -129,10 +129,7 @@ if __name__ == '__main__':
     label,p1,ts1,p2,ts2,t2,ts3,interlabel=np.hsplit(dataset, [1,x+1,x+2,2*x+2,2*x+3,3*x+3,3*x+4])
     # interlabel is a sample’s parameter showing its position in the time window. This parameter equals to 1,2,3, or 4 and is isolated from the NN’s input
     label=label.flatten()
-    sc=np.concatenate([ts1,ts2,ts3],axis=1)
-
-    results = predict_(model, [p1, p2, t2, sc])
-    print(results[0])
+    sc=np.concatenate([ts1,ts2,ts3], axis=1)
 
 
    
