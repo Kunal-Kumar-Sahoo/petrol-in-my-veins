@@ -1,7 +1,6 @@
 import csv
 import numpy as np
 import os
-import matplotlib.pyplot as plt
 
 from  tensorflow import keras
 from tensorflow.keras import layers
@@ -86,7 +85,7 @@ def get_model(x=700):
 
 def predict_(model, inputs):
     preds = model.predict(inputs)
-    return (np.argmax(preds, axis=1), preds)
+    return [np.argmax(preds, axis=1), preds]
 
 def img(a):
     A=np.zeros((m+1))
