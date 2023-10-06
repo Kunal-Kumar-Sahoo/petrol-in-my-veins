@@ -154,8 +154,8 @@ def send_preds():
     model = keras.models.load('backend/iteration1.keras')
     p1, p2, ts2, sc = dataset_creator()
     response_content = predict_(model, [p1, p2, ts2, sc])
-    response_content[0] = [prediction_labels[i] for i in response_content[0]]
-
+    for i in range(5):
+        response_content[i] = [prediction_labels[i] for i in response_content[i]]
     return response_content
 
 if __name__ == '__main__':
