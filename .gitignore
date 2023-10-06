@@ -1,3 +1,4 @@
 3W/
 ./backend/Dockerfile
 ./data/
+node_modules/
