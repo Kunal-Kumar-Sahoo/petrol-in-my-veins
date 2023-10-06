@@ -12,7 +12,14 @@ CORS(app)
 # Allow requests only from localhost:3000
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:8501"}})
 
-mail=Mail(app)
+# Get SMTP server settings from environment variables
+smtp_server = os.environ.get("smtp_server")  
+smtp_port = int(os.environ.get("smtp_port", 587))
+smtp_username = os.environ.get("smtp_username")
+smtp_password = os.environ.get("smtp_password")
+sender_email = os.environ.get("sender_email")
+receiver_email = os.environ.get("receiver_email")
+
 
 @app.route('/analysis', methods=['GET'])
 def stream_data():
@@ -31,6 +38,22 @@ def stream_data():
     return Response(generate_data(), content_type='text/event-stream')
 
 
+def send_email(subject, message):
+    try:
+        msg = MIMEText(message)
+        msg['Subject'] = subject
+        msg['From'] = sender_email
+        msg['To'] = receiver_email
+
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(smtp_username, smtp_password)
+        server.sendmail(sender_email, receiver_email, msg.as_string())
+        server.quit()
+    except Exception as e:
+        return str(e)
+
+
 @app.route('/send_email',methods=['POST'])
 def send_email():
 
@@ -40,25 +63,34 @@ def send_email():
 
     # model=load('./model.keras)
 
-    output=model.predict(data.reshape(1,-1))
-    if(output==0):
-        return jsonify("System normal")
-    elif(output==1):
-        return jsonify("Abrupt increase of BSW")
-    elif(output==2):
-        return jsonify("Spurious closure of DHSV 3")
-    elif(output==3):
-        return jsonify("Severe slugging")
-    elif(output==4):
-        return jsonify(" Flow instability")
-    elif(output==5):
-        return jsonify("Rapid productivity loss")
-    elif(output==6):
-        return jsonify("Quick restriction in PCK")
-    elif(output==7):
-        return jsonify("Scaling in PCK")
-    elif(output==8):
-        return jsonify("Hydrate in production line")
+    # output=model.predict(data.reshape(1,-1))
+
+    output = [0]
+
+    # Determine the prediction label
+    prediction_labels = [
+        "System normal",
+        "Abrupt increase of BSW",
+        "Spurious closure of DHSV 3",
+        "Severe slugging",
+        "Flow instability",
+        "Rapid productivity loss",
+        "Quick restriction in PCK",
+        "Scaling in PCK",
+        "Hydrate in production line"
+    ]
+
+    if 0 <= output[0] < len(prediction_labels):
+        prediction_label = prediction_labels[int(output[0])]
+    else:
+        prediction_label = "Unknown"
+
+    # Send an email based on the prediction
+    subject = "Fault Detection Prediction"
+    message = f"Prediction Result: {prediction_label}"
+    send_email(subject, message)
+
+    return jsonify(prediction_label)
 
 if __name__ == '__main__':
     app.run(debug=True)
