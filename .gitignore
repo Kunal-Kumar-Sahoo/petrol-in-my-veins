@@ -2,3 +2,4 @@
 ./backend/Dockerfile
 ./data/
 node_modules/
+data/
