@@ -37,10 +37,11 @@ prediction_labels = [
 ]
 
 folder_path = "./3W/0"
-data_list0, data_list1, data_list2, data_list3 = [], [], [], []
+data_list0, data_list1, data_list2, data_list3 , timestamp_list = [], [], [], [],[]
 def load_data(file_path):
     if os.path.isfile(file_path):
         data = pd.read_csv(file_path)
+        timestamp_list.extend(list(data['timestamp']))
         data_list0.extend(list(data['P-PDG']))
         data_list1.extend(list(data['P-TPT']))
         data_list2.extend(list(data['T-TPT']))
@@ -72,10 +73,11 @@ def get_next():
             counter = int(f.read())
             end_counter = int(counter + 700)
             data_updated = {
-                'data_list0': data_list0[counter:end_counter],
-                'data_list1': data_list1[counter:end_counter],
-                'data_list2': data_list2[counter:end_counter],
-                'data_list3': data_list3[counter:end_counter]
+                'timestamp' : timestamp_list[counter:end_counter],
+                'P-PDG': data_list0[counter:end_counter],
+                'P-TPT': data_list1[counter:end_counter],
+                'T-TPT': data_list2[counter:end_counter],
+                'P-MON-CKP': data_list3[counter:end_counter]
             }
             counter = int(counter + 700)
             f.seek(0)

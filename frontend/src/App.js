@@ -1,68 +1,83 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Plot from 'react-plotly.js';
+import Prediction from './prediction';
+import { BrowserRouter as Router, Route, Routes, Link, Outlet } from 'react-router-dom';
+import './App.css';
 
 function App() {
-  const [selectedPage, setSelectedPage] = useState('Dashboard');
   const [apiData, setApiData] = useState('');
   const [plotData, setPlotData] = useState({});
-  const [selectedData, setSelectedData] = useState('');
-  const [plotTitle, setPlotTitle] = useState('');
+  const [isPredictionPageVisible, setPredictionPageVisible] = useState(false);
 
-  useEffect(() => {
+  const handlePredictionClick = () => {
+    setPredictionPageVisible(true);
+  };
+
+  const handleApiCallClick = async () => {
     const apiEndpoint = 'http://localhost:5000/analysis';
 
-    const fetchDataFromApi = async () => {
-      try {
-        const response = await axios.get(apiEndpoint, { responseType: 'json' });
-        if (response.status === 200) {
-          setApiData(response.data);
-        } else {
-          console.error('Error', response.status);
-        }
-      } catch (error) {
-        console.error('An error occurred:', error);
+    try {
+      const response = await axios.get(apiEndpoint, { responseType: 'json' });
+      if (response.status === 200) {
+        setApiData(response.data);
+      } else {
+        console.error('Error', response.status);
       }
-    };
+    } catch (error) {
+      console.error('An error occurred:', error);
+    }
+  };
 
-    fetchDataFromApi();
+  useEffect(() => {
+    handleApiCallClick();
   }, []);
 
   useEffect(() => {
     if (apiData) {
-      // Assuming that apiData is an object containing four arrays, e.g., { data_list0: [], data_list1: [], data_list2: [], data_list3: [] }
       setPlotData(apiData);
     }
   }, [apiData]);
 
+  const getRandomColor = () => {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  };
+
   const renderDashboard = () => {
-    // Check if plotData is not empty
     if (Object.keys(plotData).length === 0) {
       return <div>Loading...</div>;
     }
 
     return (
-      <div>
-        <h1>Real-time Dashboard</h1>
+      <div className="card-container">
         {Object.keys(plotData).map((dataKey, index) => (
-          <div key={index}>
+          <div key={index} className="card">
             <Plot
               data={[
                 {
-                  x: Array.from({ length: plotData[dataKey].length }, (_, i) => i),
+                  x: plotData['timestamp'],
                   y: plotData[dataKey],
-                  type: 'line',
+                  type: 'scatter',
+                  mode: 'lines+markers',
                   name: dataKey,
+                  line: {
+                    color: getRandomColor(),
+                    width: 2,
+                  },
                 },
               ]}
-              layout={{ title: dataKey }}
+              layout={{
+                title: dataKey,
+                xaxis: { title: 'Timestamp' },
+                yaxis: { title: 'Value' },
+                legend: { traceorder: 'normal' },
+              }}
             />
-            <h2>Data Summary</h2>
-            <p>Selected Data: {selectedData}</p>
-            <p>
-              Mean of {selectedData}:{' '}
-              {plotData[dataKey].reduce((a, b) => a + b, 0) / plotData[dataKey].length}
-            </p>
           </div>
         ))}
       </div>
@@ -70,23 +85,24 @@ function App() {
   };
 
   return (
-    <div>
-      <h1>Real-time Plotly Dashboard</h1>
+    <div className='app-container'>
+      <h1> Dashboard</h1>
       <div>
-        <header>
-          <h2>Navigation</h2>
-        </header>
-        <select
-          value={selectedPage}
-          onChange={(e) => setSelectedPage(e.target.value)}
-        >
-          <option value="Dashboard">Dashboard</option>
-          <option value="About">About</option>
-          <option value="Contact">Contact</option>
-        </select>
+        {renderDashboard()} {/* Render the dashboard component */}
+        <div>
+          <Outlet /> 
+          <div className="button-container">
+            <Link to="/prediction">
+              <button className="predict-button" onClick={handlePredictionClick}>
+                Predict
+              </button>
+            </Link>
+            <button className="refresh-button" onClick={handleApiCallClick}>
+              Refresh
+            </button>
+          </div>
+        </div>
       </div>
-
-      {selectedPage === 'Dashboard' && <div>{renderDashboard()}</div>}
     </div>
   );
 }
