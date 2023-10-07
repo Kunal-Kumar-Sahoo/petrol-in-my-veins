@@ -10,6 +10,9 @@ import numpy as np
 import time
 import json
 
+import smtplib
+from email.mime.text import MIMEText
+
 from predictor import predict_
 
 app = Flask(__name__)
@@ -87,6 +90,7 @@ def get_next():
             f.write(str(counter))
             data_string = jsonify(data_updated)
             return data_string
+        
     except Exception as e:
         return str(e)
 
@@ -109,45 +113,44 @@ def get_next():
 
 
 
-@app.route('/send_email',methods=['POST'])
+@app.route('/send_email',methods=['GET'])
 def send_email():
 
-    message = request.get_json()
-    data=request.get_json()
-    data=np.array(data)
+   output=send_preds()
+   return output
 
     # output=model.predict(data.reshape(1,-1))
 
-    output = [0]
+    # output = [0]
 
-    # Determine the prediction labels and create the report table
-    report_table = []
-    for entry in output:
-        if 0 <= entry[0] < len(prediction_labels):
-            prediction_label = prediction_labels[int(entry[0])]
-        else:
-            prediction_label = "Unknown"
+    # # Determine the prediction labels and create the report table
+    # report_table = []
+    # for entry in output:
+    #     if 0 <= entry[0] < len(prediction_labels):
+    #         prediction_label = prediction_labels[int(entry[0])]
+    #     else:
+    #         prediction_label = "Unknown"
         
-        prediction_value = entry[1]
-        report_table.append([f'Sucker Rod Pump ID :{entry}',prediction_label, prediction_value])
+    #     prediction_value = entry[1]
+    #     report_table.append([f'Sucker Rod Pump ID :{entry}',prediction_label, prediction_value])
 
-    # Send an email with the report table
-    subject = "Fault Detection Prediction Report"
-    message = "Prediction Results:\n\n"
-    message += "Prediction Label\tPrediction Value\n"
-    for entry in report_table:
-        message += f"\t{entry[1]}\t{entry[2]}\n"
+    # # Send an email with the report table
+    # subject = "Fault Detection Prediction Report"
+    # message = "Prediction Results:\n\n"
+    # message += "Prediction Label\tPrediction Value\n"
+    # for entry in report_table:
+    #     message += f"\t{entry[1]}\t{entry[2]}\n"
 
-    # Replace with your email sending function
-    send_email(subject, message)
+    # # Replace with your email sending function
+    # send_email(subject, message)
 
-    # Return the report table as JSON (optional)
-    return jsonify(report_table)
+    # # Return the report table as JSON (optional)
+    # return jsonify(report_table)
 
 
 def load_dataset():
     dataset=[]
-    with open(r'data/2.csv', newline='') as f:
+    with open(r'./2.csv', newline='') as f:
         reader = csv.reader(f)
         for row in reader:
             dataset.append(row)
@@ -168,12 +171,31 @@ def dataset_creator():
 
 
 def send_preds():
-    model = keras.models.load('backend/iteration1.keras')
-    p1, p2, ts2, sc = dataset_creator()
-    response_content = predict_(model, [p1, p2, ts2, sc])
-    for i in range(5):
-        response_content[i] = [prediction_labels[i] for i in response_content[i]]
-    return response_content
+    with open('./response_cache.txt','r+') as f:
+        counter=int(f.read())
+        endcounter=int(int(counter)+5)
+
+        model = keras.models.load_model('./iteration1.keras')
+        p1, p2, ts2, sc = dataset_creator()
+
+        response_content = predict_(model, [p1, p2, ts2, sc])
+        updated_response=[]
+
+        for i in range(counter,endcounter):
+            j=response_content[0][i]
+            response_content[0][i] = prediction_labels[j]
+            print(response_content[0][i])
+
+        try:
+            for i in range(counter,endcounter):
+                updated_response.append([str(response_content[0][i]), str(max(response_content[1][i])*100)])
+        except Exception as e:
+            print("Exception: ",e)
+
+        f.seek(0)
+        f.write(str(endcounter))
+        print(updated_response)
+        return updated_response
 
 if __name__ == '__main__':
     app.run(debug=True)
