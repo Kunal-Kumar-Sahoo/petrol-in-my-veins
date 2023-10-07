@@ -8,7 +8,7 @@ function Prediction(){
   const [data,setData]=useState({0:{fault:"",prob:""},1:{fault:"",prob:""},2:{fault:"",prob:""},3:{fault:"",prob:""},4:{fault:"",prob:""}})
 
   async function handleClick(){
-      const response=await axios.get('http://127.0.0.1:5000/send_email',{responseType:'json'})
+      const response=await axios.get('http://backend:5000/send_email',{responseType:'json'})
       if(response.status===200){
           setData({0:{fault:response.data[0].fault,prob:response.data[0].prob},1:{fault:response.data[1].fault,prob:response.data[1].prob},2:{fault:response.data[2].fault,prob:response.data[2].prob},3:{fault:response.data[3].fault,prob:response.data[3].prob},4:{fault:response.data[4].fault,prob:response.data[4].prob}})
       }

@@ -15,7 +15,7 @@ function App() {
   };
 
   const handleApiCallClick = async () => {
-    const apiEndpoint = 'http://localhost:5000/analysis';
+    const apiEndpoint = 'http://backend:5000/analysis';
 
     try {
       const response = await axios.get(apiEndpoint, { responseType: 'json' });

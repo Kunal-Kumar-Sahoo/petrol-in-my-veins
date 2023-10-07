@@ -19,7 +19,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Allow requests only from localhost:3000
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
+CORS(app, resources={r"/api/*": {"origins": "http://frontend:3000"}})
 
 # Get SMTP server settings from environment variables
 smtp_server = os.environ.get("smtp_server")  
