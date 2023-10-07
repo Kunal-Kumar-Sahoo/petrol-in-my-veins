@@ -112,12 +112,22 @@ def get_next():
 #                 return jsonify(data_string)
 
 
+def custom_jsonify(list_):
+    custom_json = {}
+    for i, record in enumerate(list_):
+        custom_json[i] = {
+            'fault': record[0],
+            'prob': record[1]
+        }
+    return custom_json
 
 @app.route('/send_email',methods=['GET'])
 def send_email():
 
    output=send_preds()
-   return output
+   return custom_jsonify(output)
+   
+#    return output
 
     # output=model.predict(data.reshape(1,-1))
 
@@ -184,7 +194,6 @@ def send_preds():
         for i in range(counter,endcounter):
             j=response_content[0][i]
             response_content[0][i] = prediction_labels[j]
-            print(response_content[0][i])
 
         try:
             for i in range(counter,endcounter):
