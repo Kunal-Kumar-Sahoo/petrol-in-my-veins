@@ -3,3 +3,4 @@ backend/Dockerfile
 data/
 node_modules/
 *.zip
+backend/2.csv
