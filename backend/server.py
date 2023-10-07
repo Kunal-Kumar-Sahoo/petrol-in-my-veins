@@ -40,6 +40,7 @@ prediction_labels = [
 
 folder_path = "./3W/0"
 data_list0, data_list1, data_list2, data_list3 , timestamp_list = [], [], [], [],[]
+
 def load_data(file_path):
     if os.path.isfile(file_path):
         data = pd.read_csv(file_path)

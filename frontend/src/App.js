@@ -52,41 +52,48 @@ function App() {
     if (Object.keys(plotData).length === 0) {
       return <div>Loading...</div>;
     }
-
+  
+    const plotKeys = Object.keys(plotData).slice(0, 4);
+  
     return (
       <div className="card-container">
-        {Object.keys(plotData).map((dataKey, index) => (
+        {plotKeys.map((dataKey, index) => (
           <div key={index} className="card">
-            <Plot
-              data={[
-                {
-                  x: plotData['timestamp'],
-                  y: plotData[dataKey],
-                  type: 'scatter',
-                  mode: 'lines+markers',
-                  name: dataKey,
-                  line: {
-                    color: getRandomColor(),
-                    width: 2,
+            <div className="plot-container">
+              <Plot
+                data={[
+                  {
+                    x: plotData['timestamp'],
+                    y: plotData[dataKey],
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    name: dataKey,
+                    line: {
+                      color: getRandomColor(),
+                      width: 2,
+                    },
                   },
-                },
-              ]}
-              layout={{
-                title: dataKey,
-                xaxis: { title: 'Timestamp' },
-                yaxis: { title: 'Value' },
-                legend: { traceorder: 'normal' },
-              }}
-            />
+                ]}
+                layout={{
+                  title: dataKey,
+                  xaxis: { title: 'Timestamp' },
+                  yaxis: { title: 'Value' },
+                  legend: { traceorder: 'normal' },
+                  width: 400,
+                  height: 300, // Set the height of each plot
+                }}
+                className="plotly-plot" // Apply plot styling
+              />
+            </div>
           </div>
         ))}
       </div>
     );
   };
-
+  
   return (
     <div className='app-container'>
-      <h1> Dashboard</h1>
+      <h1> Sucker Rod Pump fault detection dashboard</h1>
       <div>
         {renderDashboard()} {/* Render the dashboard component */}
         <div>
@@ -106,5 +113,4 @@ function App() {
     </div>
   );
 }
-
 export default App;
