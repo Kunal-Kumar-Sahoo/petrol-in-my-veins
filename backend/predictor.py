@@ -84,11 +84,11 @@ def get_model(x=700):
 
 def predict_(model, inputs):
     preds = model.predict(inputs)
-    return [np.argmax(preds, axis=1), preds]
+    return [np.argmax(preds, axis=1).tolist(), preds.tolist()]
 
 def data_generator():
     dataset=[]
-    with open(r'data/2.csv', newline='') as f:
+    with open(r'./2.csv', newline='') as f:
         reader = csv.reader(f)
         for row in reader:
             dataset.append(row)
@@ -112,10 +112,10 @@ def data_generator():
 
 if __name__ == '__main__':
     # unit testing code here
-    model = keras.models.load_model('backend/iteration1.keras')
+    model = keras.models.load_model('./iteration1.keras')
     # print(model.summary())
     dataset=[]
-    with open(r'data/2.csv', newline='') as f:
+    with open(r'./2.csv', newline='') as f:
         reader = csv.reader(f)
         for row in reader:
             dataset.append(row)
