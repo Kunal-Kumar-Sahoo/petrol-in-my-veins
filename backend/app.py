@@ -10,6 +10,9 @@ import numpy as np
 import time
 import json
 
+import smtplib
+from email.mime.text import MIMEText
+
 from predictor import predict_
 
 app = Flask(__name__)
@@ -38,16 +41,17 @@ prediction_labels = [
     "Hydrate in production line"
 ]
 
-# folder_path = "./3W/0"
-# data_list0, data_list1, data_list2, data_list3 , timestamp_list = [], [], [], [],[]
-# def load_data(file_path):
-#     if os.path.isfile(file_path):
-#         data = pd.read_csv(file_path)
-#         timestamp_list.extend(list(data['timestamp']))
-#         data_list0.extend(list(data['P-PDG']))
-#         data_list1.extend(list(data['P-TPT']))
-#         data_list2.extend(list(data['T-TPT']))
-#         data_list3.extend(list(data['P-MON-CKP']))
+folder_path = "./3W/0"
+data_list0, data_list1, data_list2, data_list3 , timestamp_list = [], [], [], [],[]
+
+def load_data(file_path):
+    if os.path.isfile(file_path):
+        data = pd.read_csv(file_path)
+        timestamp_list.extend(list(data['timestamp']))
+        data_list0.extend(list(data['P-PDG']))
+        data_list1.extend(list(data['P-TPT']))
+        data_list2.extend(list(data['T-TPT']))
+        data_list3.extend(list(data['P-MON-CKP']))
     
 def send_email(subject, message):
     try:
@@ -64,9 +68,9 @@ def send_email(subject, message):
     except Exception as e:
         return str(e)
 
-# for file_name in os.listdir(folder_path):
-#         file_path = os.path.join(folder_path, file_name)
-#         load_data(file_path)
+for file_name in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, file_name)
+        load_data(file_path)
 
 @app.route('/analysis', methods=['GET'])
 def get_next():
@@ -86,6 +90,7 @@ def get_next():
             f.write(str(counter))
             data_string = jsonify(data_updated)
             return data_string
+        
     except Exception as e:
         return str(e)
 
